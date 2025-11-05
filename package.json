@@ -1,6 +1,6 @@
 {
   "name": "@aismarttalk/legifrance-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TypeScript SDK for the Legifrance API - Access French legal texts, jurisprudence, and codes with full type safety",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
