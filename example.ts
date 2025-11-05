@@ -39,11 +39,19 @@ async function main() {
     console.log('Error:', error.message);
   }
 
-  // Search in LODA (with proper types!)
+  // Search in LODA (ALL parameters available!)
   try {
     const result = await client.searchLoda('environnement', { 
       pageSize: 3,
-      natures: [Nature.DECRET, Nature.ARRETE]
+      natures: [Nature.DECRET, Nature.ARRETE],
+      fond: 'LODA_DATE',
+      dateSignature: { start: '2024-01-01', end: '2024-02-31' },
+      // fond: 'LODA_DATE', // or 'LODA_ETAT'
+      // textId: 'LEGITEXT000006074220', // Search by specific text ID
+      // dateSignature: '2024-01-01', // or { start: '2024-01-01', end: '2024-12-31' }
+      // datePublication: { start: '2024-01-01', end: '2024-12-31' },
+      // champ: 'ALL', // or 'TEXTE', 'TITLE', 'NUM'
+      // typeRecherche: 'TOUS_LES_MOTS_DANS_UN_CHAMP', // or 'UN_DES_MOTS', 'EXACTE'
     });
     
     console.log('\nLODA search:');

@@ -231,72 +231,126 @@ export class LegifranceClient {
   }
 
   /**
-   * Search in LODA texts with filters (like Python pylegifrance)
+   * Search in LODA texts with ALL filters (complete Python implementation)
    */
   async searchLoda(
-    query: string, 
+    query?: string, 
     options?: { 
-      pageSize?: number; 
-      pageNumber?: number;
+      textId?: string;
+      champ?: string;
+      typeRecherche?: string;
+      fond?: 'LODA_DATE' | 'LODA_ETAT';
       natures?: string[];
+      dateSignature?: { start: string; end: string } | string;
+      datePublication?: { start: string; end: string } | string;
+      pageNumber?: number;
+      pageSize?: number;
     }
   ): Promise<SearchResponse> {
-    // Build search fields (multiple fields for better results)
-    const champs = [
-      {
-        typeChamp: 'ALL',
+    const champs: any[] = [];
+
+    // Add text_id field if provided (search by NUM field)
+    if (options?.textId) {
+      champs.push({
+        typeChamp: 'NUM',
         criteres: [{
-          valeur: query,
-          typeRecherche: 'TOUS_LES_MOTS_DANS_UN_CHAMP',
+          valeur: options.textId,
+          typeRecherche: 'EXACTE',
           operateur: 'ET' as const,
+          proximite: null,
+          criteres: null,
         }],
         operateur: 'ET' as const,
-      },
-      {
+      });
+    }
+
+    // Add search field if provided
+    if (query) {
+      // Search in ALL fields with TOUS_LES_MOTS_DANS_UN_CHAMP
+      champs.push({
+        typeChamp: options?.champ || 'ALL',
+        criteres: [{
+          valeur: query,
+          typeRecherche: options?.typeRecherche || 'TOUS_LES_MOTS_DANS_UN_CHAMP',
+          operateur: 'ET' as const,
+          proximite: null,
+          criteres: null,
+        }],
+        operateur: 'ET' as const,
+      });
+
+      // Also search in TEXTE field with UN_DES_MOTS
+      champs.push({
         typeChamp: 'TEXTE',
         criteres: [{
           valeur: query,
           typeRecherche: 'UN_DES_MOTS',
           operateur: 'ET' as const,
+          proximite: null,
+          criteres: null,
         }],
         operateur: 'OU' as const,
-      },
-      {
+      });
+
+      // Also search in TITLE field with UN_DES_MOTS
+      champs.push({
         typeChamp: 'TITLE',
         criteres: [{
           valeur: query,
           typeRecherche: 'UN_DES_MOTS',
           operateur: 'ET' as const,
+          proximite: null,
+          criteres: null,
         }],
         operateur: 'OU' as const,
-      },
-    ];
+      });
+    }
+
+    // If no fields, create a default field that will match all
+    if (champs.length === 0) {
+      champs.push({
+        typeChamp: 'TITLE',
+        criteres: [{
+          valeur: ' ',
+          typeRecherche: 'EXACTE',
+          operateur: 'ET' as const,
+          proximite: null,
+          criteres: null,
+        }],
+        operateur: 'ET' as const,
+      });
+    }
 
     // Build filters (like Python)
-    const filtres: any[] = [
-      {
-        facette: 'DATE_VERSION',
-        singleDate: Date.now(), // Timestamp, not ISO string
-        dates: null,
-        valeurs: null,
-        multiValeurs: null,
-      },
-      {
-        facette: 'TEXT_LEGAL_STATUS',
-        valeurs: ['VIGUEUR'],
-        dates: null,
-        singleDate: null,
-        multiValeurs: null,
-      },
-      {
-        facette: 'ARTICLE_LEGAL_STATUS',
-        valeurs: ['VIGUEUR'],
-        dates: null,
-        singleDate: null,
-        multiValeurs: null,
-      },
-    ];
+    const filtres: any[] = [];
 
+    // Always add date version filter
+    filtres.push({
+      facette: 'DATE_VERSION',
+      singleDate: Date.now(),
+      dates: null,
+      valeurs: null,
+      multiValeurs: null,
+    });
+
+    // Always add legal status filters
+    filtres.push({
+      facette: 'TEXT_LEGAL_STATUS',
+      valeurs: ['VIGUEUR'],
+      dates: null,
+      singleDate: null,
+      multiValeurs: null,
+    });
+
+    filtres.push({
+      facette: 'ARTICLE_LEGAL_STATUS',
+      valeurs: ['VIGUEUR'],
+      dates: null,
+      singleDate: null,
+      multiValeurs: null,
+    });
+
+    // Add nature filter if specified
     if (options?.natures && options.natures.length > 0) {
       filtres.push({
         facette: 'NATURE',
@@ -307,8 +361,40 @@ export class LegifranceClient {
       });
     }
 
+    // Add date signature filter if specified
+    if (options?.dateSignature) {
+      const dates = typeof options.dateSignature === 'string'
+        ? { start: options.dateSignature, end: options.dateSignature }
+        : options.dateSignature;
+      
+      filtres.push({
+        facette: 'DATE_SIGNATURE',
+        dates,
+        valeurs: null,
+        singleDate: null,
+        multiValeurs: null,
+      });
+    }
+
+    // Add date publication filter if specified
+    if (options?.datePublication) {
+      const dates = typeof options.datePublication === 'string'
+        ? { start: options.datePublication, end: options.datePublication }
+        : options.datePublication;
+      
+      filtres.push({
+        facette: 'DATE_PUBLICATION',
+        dates,
+        valeurs: null,
+        singleDate: null,
+        multiValeurs: null,
+      });
+    }
+
+    const fond = options?.fond || 'LODA_DATE';
+
     const searchRequest: SearchRequest = {
-      fond: 'LODA_DATE',
+      fond,
       recherche: {
         champs,
         filtres,
