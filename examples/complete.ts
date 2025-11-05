@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { LegifranceClient, LodaSearchResult, JuriSearchResult, Nature, SortJuri, TypeRecherche } from './src';
+import { LegifranceClient, LodaSearchResult, JuriSearchResult, Nature, SortJuri } from '../src';
 
 async function main() {
   const client = new LegifranceClient({
@@ -9,7 +9,7 @@ async function main() {
   });
 
   await client.initialize();
-  console.log('Authenticated\n');
+  console.log('✅ Authenticated\n');
 
   // Test ping
   try {
@@ -19,7 +19,7 @@ async function main() {
     console.log('Error:', error.message);
   }
 
-  // List LODA texts (WORKS on sandbox)
+  // List LODA texts
   try {
     const result = await client.listLoda({
       pageSize: 5,
@@ -39,19 +39,13 @@ async function main() {
     console.log('Error:', error.message);
   }
 
-  // Search in LODA (ALL parameters available!)
+  // Search in LODA
   try {
     const result = await client.searchLoda('environnement', { 
       pageSize: 3,
       natures: [Nature.DECRET, Nature.ARRETE],
       fond: 'LODA_DATE',
-      dateSignature: { start: '2024-01-01', end: '2024-02-31' },
-      // fond: 'LODA_DATE', // or 'LODA_ETAT'
-      // textId: 'LEGITEXT000006074220', // Search by specific text ID
-      // dateSignature: '2024-01-01', // or { start: '2024-01-01', end: '2024-12-31' }
-      // datePublication: { start: '2024-01-01', end: '2024-12-31' },
-      // champ: 'ALL', // or 'TEXTE', 'TITLE', 'NUM'
-      // typeRecherche: 'TOUS_LES_MOTS_DANS_UN_CHAMP', // or 'UN_DES_MOTS', 'EXACTE'
+      dateSignature: { start: '2024-01-01', end: '2024-02-28' },
     });
     
     console.log('\nLODA search:');
@@ -59,7 +53,6 @@ async function main() {
     console.log('Results:', result.results.length);
     
     result.results.forEach((item: LodaSearchResult, i: number) => {        
-      // All fields are typed!
       const title = item.titles[0]?.title || item.id;
       console.log(`${i + 1}. ${title}`);
       console.log(`   Nature: ${item.nature}`);
@@ -93,3 +86,4 @@ async function main() {
 }
 
 main();
+

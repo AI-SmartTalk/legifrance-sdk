@@ -170,7 +170,14 @@ const client = new LegifranceClient({
 });
 ```
 
-## 📚 Examples
+## 📚 Code Examples
+
+Check the [`examples/`](./examples) folder for complete working examples:
+
+- **`basic.ts`** - Simple ping and list example
+- **`loda-search.ts`** - Complete LODA search with all filters
+- **`juri-search.ts`** - Complete jurisprudence search examples
+- **`complete.ts`** - Combined LODA + JURI example
 
 ### List LODA Texts
 
@@ -249,10 +256,22 @@ console.log(text.title);
 npm run build
 ```
 
-## 🧪 Test
+## 🧪 Examples
+
+Run examples from the `examples/` folder:
 
 ```bash
-npx ts-node example.ts
+# Basic example (ping, list)
+npx ts-node examples/basic.ts
+
+# LODA search examples
+npx ts-node examples/loda-search.ts
+
+# JURI search examples
+npx ts-node examples/juri-search.ts
+
+# Complete example (LODA + JURI)
+npx ts-node examples/complete.ts
 ```
 
 ## 📄 License
