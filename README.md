@@ -15,7 +15,6 @@ Made with ❤️ by [**AI Smarttalk**](https://aismarttalk.tech)
 
 - ✅ **Full TypeScript support** with autocomplete
 - ✅ **OAuth2 authentication** handled automatically
-- ✅ **5577+ types generated** from Swagger 2.0 specification
 - ✅ **Sandbox & Production** environments
 - ✅ **Complete LODA search** with all filters (dates, natures, legal status)
 - ✅ **Clean & simple API**
@@ -176,7 +175,7 @@ npm run build
 ## 🧪 Test
 
 ```bash
-npm test
+npx ts-node example.ts
 ```
 
 ## 📄 License
