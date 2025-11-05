@@ -22,9 +22,9 @@ export interface OAuthToken {
 }
 
 /**
- * Requête de recherche générale
+ * LODA Search request
  */
-export interface SearchRequest {
+export interface LodaSearchRequest {
   recherche: Recherche;
   fond?: string;
   champ?: string;
@@ -33,6 +33,9 @@ export interface SearchRequest {
   sort?: string;
   typePagination?: string;
 }
+
+// Backward compatibility
+export type SearchRequest = LodaSearchRequest;
 
 export interface Recherche {
   champs: RechercheChamp[];
@@ -66,16 +69,19 @@ export interface Filtre {
 }
 
 /**
- * Réponse de recherche
+ * LODA Search response
  */
-export interface SearchResponse {
-  results: SearchResult[];
+export interface LodaSearchResponse {
+  results: LodaSearchResult[];
   totalResultNumber: number;
   pageNumber: number;
   pageSize: number;
 }
 
-export interface SearchResultTitle {
+// Backward compatibility
+export type SearchResponse = LodaSearchResponse;
+
+export interface LodaSearchResultTitle {
   id: string;
   cid: string;
   title: string;
@@ -85,7 +91,7 @@ export interface SearchResultTitle {
   nature: string | null;
 }
 
-export interface SearchResultSection {
+export interface LodaSearchResultSection {
   id: string | null;
   title: string | null;
   dateVersion: string | null;
@@ -93,17 +99,17 @@ export interface SearchResultSection {
   extracts: any[];
 }
 
-export interface SearchResult {
+export interface LodaSearchResult {
   id: string;
   cid: string;
-  titles: SearchResultTitle[];
+  titles: LodaSearchResultTitle[];
   text: string | null;
   type: string;
   nature: string;
   origin: string;
   etat: string;
   date: string;
-  sections: SearchResultSection[];
+  sections: LodaSearchResultSection[];
   num: string | null;
   jorfText: string | null;
   numParution: string | null;
@@ -129,6 +135,11 @@ export interface SearchResult {
   texteHtml?: string;
   title?: string;
 }
+
+// Backward compatibility aliases
+export type SearchResult = LodaSearchResult;
+export type SearchResultTitle = LodaSearchResultTitle;
+export type SearchResultSection = LodaSearchResultSection;
 
 /**
  * Requête de consultation de code
@@ -263,5 +274,62 @@ export interface ChronoVersionResponse {
 export interface Version {
   date: number;
   etat: string;
+}
+
+// JURI (Jurisprudence) Types - Using generated types
+export interface JuriSearchRequest {
+  fond: 'JURI';
+  recherche: {
+    champs: any[];
+    filtres: any[];
+    operateur: string;
+    pageNumber: number;
+    pageSize: number;
+    sort: string;
+    typePagination: string;
+    fromAdvancedRecherche?: boolean;
+    secondSort?: string;
+  };
+}
+
+// Re-export SearchResponseDTO as JuriSearchResponse for convenience
+export type JuriSearchResponse = {
+  totalResultNumber?: number;
+  totalNbResult?: number;
+  executionTime?: number;
+  results?: JuriSearchResult[];
+  facets?: any[];
+  typePagination?: string;
+}
+
+// Extended SearchResult with JURI-specific fields
+export interface JuriSearchResult {
+  nor?: string;
+  etat?: string;
+  themes?: string[];
+  nature?: string;
+  type?: string;
+  datePublication?: string;
+  titles?: {
+    id?: string;
+    cid?: string;
+    title?: string;
+    legalStatus?: string | null;
+    startDate?: string | null;
+    endDate?: string | null;
+    nature?: string | null;
+  }[];
+  text?: string;
+  origin?: string;
+  date?: string;
+  sections?: {
+    id?: string | null;
+    title?: string | null;
+    dateVersion?: string | null;
+    legalStatus?: string | null;
+    extracts?: any[];
+  }[];
+  additionalResult?: Record<string, any>;
+  [key: string]: any;
 }
 

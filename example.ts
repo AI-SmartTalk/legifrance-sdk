@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { LegifranceClient, Nature, Facette } from './src';
+import { LegifranceClient, LodaSearchResult, JuriSearchResult, Nature, SortJuri, TypeRecherche } from './src';
 
 async function main() {
   const client = new LegifranceClient({
@@ -58,7 +58,7 @@ async function main() {
     console.log('Total:', result.totalResultNumber);
     console.log('Results:', result.results.length);
     
-    result.results.forEach((item, i) => {        
+    result.results.forEach((item: LodaSearchResult, i: number) => {        
       // All fields are typed!
       const title = item.titles[0]?.title || item.id;
       console.log(`${i + 1}. ${title}`);
@@ -69,6 +69,26 @@ async function main() {
     });
   } catch (error: any) {
     console.log('Search error:', error.response?.status, error.response?.data?.message || error.message);
+  }
+
+  // Search in JURI (Jurisprudence)
+  try {
+    const result = await client.searchJuri('contrat de travail', {
+      pageSize: 3,
+      sort: SortJuri.PERTINENCE,
+    });
+
+    console.log('\nJURI search:');
+    console.log('Total:', result.totalResultNumber || result.totalNbResult);
+    console.log('Results:', result.results?.length || 0);
+
+    result.results?.forEach((item: JuriSearchResult, i: number) => {
+      const title = item.titles?.[0]?.title || 'No title';
+      console.log(`${i + 1}. ${title}`);
+      console.log(`   Nature: ${item.nature || 'N/A'}`);
+    });
+  } catch (error: any) {
+    console.log('JURI error:', error.response?.status, error.response?.data?.message || error.message);
   }
 }
 

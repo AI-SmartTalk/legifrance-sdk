@@ -1,21 +1,22 @@
 import axios, { AxiosInstance } from 'axios';
 import {
-  LegifranceConfig,
-  OAuthToken,
-  SearchRequest,
-  SearchResponse,
-  ConsultCodeRequest,
-  ConsultCodeResponse,
-  JorfRequest,
-  JorfResponse,
-  ArticleByCidRequest,
-  ArticleResponse,
-  SuggestRequest,
-  SuggestResponse,
-  ChronoVersionRequest,
-  ChronoVersionResponse,
-  ListRequest,
-} from './types';
+    LegifranceConfig,
+    OAuthToken,
+    LodaSearchRequest,
+    LodaSearchResponse,
+    ConsultCodeRequest,
+    ConsultCodeResponse,
+    JorfRequest,
+    JorfResponse,
+    ArticleByCidRequest,
+    ArticleResponse,
+    SuggestRequest,
+    SuggestResponse,
+    ChronoVersionRequest,
+    ChronoVersionResponse,
+    ListRequest,
+    JuriSearchResponse,
+  } from './types';
 
 /**
  * Client SDK pour l'API Legifrance
@@ -133,7 +134,7 @@ export class LegifranceClient {
   /**
    * Recherche de textes juridiques
    */
-  async search(request: SearchRequest): Promise<SearchResponse> {
+  async search(request: LodaSearchRequest): Promise<LodaSearchResponse> {
     const response = await this.axiosInstance.post('/search', request);
     return response.data;
   }
@@ -246,7 +247,7 @@ export class LegifranceClient {
       pageNumber?: number;
       pageSize?: number;
     }
-  ): Promise<SearchResponse> {
+  ): Promise<LodaSearchResponse> {
     const champs: any[] = [];
 
     // Add text_id field if provided (search by NUM field)
@@ -393,7 +394,7 @@ export class LegifranceClient {
 
     const fond = options?.fond || 'LODA_DATE';
 
-    const searchRequest: SearchRequest = {
+    const searchRequest: LodaSearchRequest = {
       fond,
       recherche: {
         champs,
@@ -411,6 +412,123 @@ export class LegifranceClient {
   }
 
   /**
+   * Search in JURI (Jurisprudence) with ALL filters
+   */
+  async searchJuri(
+    query: string = '',
+    options?: {
+      publicationBulletin?: string[];
+      juridictionJudiciaire?: string[];
+      dateStart?: string;
+      dateEnd?: string;
+      dateFacet?: string;
+      formation?: string[];
+      courAppel?: string[];
+      field?: string;
+      searchType?: string;
+      sort?: string;
+      pageNumber?: number;
+      pageSize?: number;
+    }
+  ): Promise<JuriSearchResponse> {
+    // Create search criteria
+    const critere = {
+      valeur: query,
+      operateur: 'ET' as const,
+      typeRecherche: options?.searchType || 'UN_DES_MOTS',
+      proximite: null,
+      criteres: null,
+    };
+
+    // Create search field
+    const champ = {
+      criteres: [critere],
+      operateur: 'ET' as const,
+      typeChamp: options?.field || 'ALL',
+    };
+
+    // Build filters
+    const filtres: any[] = [];
+
+    // Add publication bulletin filter if specified
+    if (options?.publicationBulletin && options.publicationBulletin.length > 0) {
+      filtres.push({
+        facette: 'CASSATION_TYPE_PUBLICATION_BULLETIN',
+        valeurs: options.publicationBulletin,
+        dates: null,
+        singleDate: null,
+        multiValeurs: null,
+      });
+    }
+
+    // Add juridiction judiciaire filter if specified
+    if (options?.juridictionJudiciaire && options.juridictionJudiciaire.length > 0) {
+      filtres.push({
+        facette: 'JURIDICTION_JUDICIAIRE',
+        valeurs: options.juridictionJudiciaire,
+        dates: null,
+        singleDate: null,
+        multiValeurs: null,
+      });
+    }
+
+    // Add date filter if specified
+    if (options?.dateStart && options?.dateEnd) {
+      filtres.push({
+        facette: options?.dateFacet || 'DATE_DECISION',
+        valeurs: null,
+        dates: {
+          start: options.dateStart,
+          end: options.dateEnd,
+        },
+        singleDate: null,
+        multiValeurs: null,
+      });
+    }
+
+    // Add formation filter if specified
+    if (options?.formation && options.formation.length > 0) {
+      filtres.push({
+        facette: 'CASSATION_FORMATION',
+        valeurs: options.formation,
+        dates: null,
+        singleDate: null,
+        multiValeurs: null,
+      });
+    }
+
+    // Add court of appeal filter if specified
+    if (options?.courAppel && options.courAppel.length > 0 &&
+        options?.juridictionJudiciaire?.includes("Juridictions d'appel")) {
+      filtres.push({
+        facette: 'APPEL_SIEGE_APPEL',
+        valeurs: options.courAppel,
+        dates: null,
+        singleDate: null,
+        multiValeurs: null,
+      });
+    }
+
+    const juriRequest = {
+      fond: 'JURI',
+      recherche: {
+        champs: [champ],
+        filtres,
+        operateur: 'ET',
+        pageNumber: options?.pageNumber || 1,
+        pageSize: options?.pageSize || 5,
+        sort: options?.sort || 'PERTINENCE',
+        typePagination: 'DEFAUT',
+        fromAdvancedRecherche: false,
+        secondSort: 'ID',
+      },
+    };
+
+    const response = await this.axiosInstance.post('/search', juriRequest);
+    return response.data;
+  }
+
+  /**
    * Ping pour vérifier la connexion
    */
   async ping(): Promise<string> {
@@ -421,7 +539,7 @@ export class LegifranceClient {
   /**
    * Recherche croisée
    */
-  async crossSearch(request: SearchRequest): Promise<SearchResponse> {
+  async crossSearch(request: LodaSearchRequest): Promise<LodaSearchResponse> {
     const response = await this.axiosInstance.post('/search/crossSearch', request);
     return response.data;
   }

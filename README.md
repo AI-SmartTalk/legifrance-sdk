@@ -54,12 +54,15 @@ console.log(`Found ${result.totalResultNumber} results`);
 |----------|--------|-------------|--------|
 | `/consult/ping` | `ping()` | Test API connectivity | ✅ Working |
 | `/list/loda` | `listLoda()` | List LODA texts | ✅ Working |
-| `/search` | `searchLoda()` | Search LODA with filters | ✅ Working |
+| `/search` (LODA) | `searchLoda()` | Search LODA with filters | ✅ Working |
+| `/search` (JURI) | `searchJuri()` | Search jurisprudence with filters | ✅ Working |
 | `/consult/loda` | `consultLoda()` | Consult a LODA text | ✅ Working |
 | `/consult/loda/version` | `consultLodaVersion()` | Consult specific version | ✅ Working |
 | `/consult/loda/versions` | `listLodaVersions()` | List text versions | ✅ Working |
 
 ## 🔍 Search Parameters
+
+### LODA Search (LOI, ORDONNANCE, DECRET, ARRETE)
 
 The `searchLoda()` method supports all parameters from the official Python wrapper:
 
@@ -84,16 +87,65 @@ await client.searchLoda('query text', {
 });
 ```
 
+### JURI Search (Jurisprudence)
+
+The `searchJuri()` method supports comprehensive jurisprudence search with filters:
+
+```typescript
+await client.searchJuri('contrat de travail', {
+  // Pagination
+  pageSize: 5,
+  pageNumber: 1,
+  
+  // Publication filter
+  publicationBulletin: [PublicationStatus.PUBLIER], // or NON_PUBLIER, PUBLIER_EXTRAIT
+  
+  // Juridiction filter
+  juridictionJudiciaire: ['Cour de cassation'], // or "Juridictions d'appel", etc.
+  
+  // Date filter
+  dateStart: '2024-01-01',
+  dateEnd: '2024-12-31',
+  dateFacet: 'DATE_DECISION', // or 'DATE_PUBLI'
+  
+  // Formation filter (for Cour de cassation)
+  formation: ['Chambre sociale'], // or 'Chambre commerciale', 'Première chambre civile', etc.
+  
+  // Court of appeal location (only for "Juridictions d'appel")
+  courAppel: ['Paris'],
+  
+  // Search configuration
+  field: 'ALL', // 'ALL' | 'TEXTE' | 'TITLE'
+  searchType: 'UN_DES_MOTS', // or 'TOUS_LES_MOTS_DANS_UN_CHAMP', 'EXACTE'
+  sort: SortJuri.PERTINENCE, // or DATE_DESC, DATE_ASC
+});
+```
+
+**Return type:** Fully typed `JuriSearchResponse` with `JuriSearchResult[]` - no `any` types! ✨
+
 ## 📖 Available Constants
 
 ```typescript
 import { 
-  Nature,      // LOI, DECRET, ARRETE, ORDONNANCE, etc.
-  Fond,        // LODA_DATE, LODA_ETAT, CODE_DATE, etc.
-  TypeChamp,   // ALL, TEXTE, TITLE, NUM, etc.
-  Operateur,   // ET, OU, SAUF, NEAR, etc.
-  Facette,     // DATE_VERSION, TEXT_LEGAL_STATUS, etc.
-  Sort,        // PUBLICATION_DATE_DESC, SIGNATURE_DATE_ASC, etc.
+  // Common
+  Nature,              // LOI, DECRET, ARRETE, ORDONNANCE, etc.
+  Fond,                // LODA_DATE, LODA_ETAT, CODE_DATE, JURI, etc.
+  TypeChamp,           // ALL, TEXTE, TITLE, NUM, etc.
+  Operateur,           // ET, OU, SAUF, NEAR, etc.
+  Facette,             // DATE_VERSION, TEXT_LEGAL_STATUS, etc.
+  Sort,                // PUBLICATION_DATE_DESC, SIGNATURE_DATE_ASC, etc.
+  
+  // LODA-specific
+  LodaSearchRequest,   // Typed request
+  LodaSearchResponse,  // Typed response
+  LodaSearchResult,    // Typed result
+  
+  // JURI-specific
+  SortJuri,            // PERTINENCE, DATE_DESC, DATE_ASC
+  PublicationStatus,   // PUBLIER, NON_PUBLIER, PUBLIER_EXTRAIT
+  FacettesJuri,        // CASSATION_TYPE_PUBLICATION_BULLETIN, JURIDICTION_JUDICIAIRE, etc.
+  JuriSearchResponse,  // Typed response
+  JuriSearchResult,    // Typed result
 } from 'legifrance-sdk';
 ```
 
@@ -149,9 +201,34 @@ const result = await client.searchLoda('décret', {
 ### Search by Nature
 
 ```typescript
+import { LodaSearchResult } from 'legifrance-sdk';
+
 const result = await client.searchLoda('travail', {
   natures: [Nature.LOI, Nature.ORDONNANCE],
   pageSize: 10,
+});
+
+// Fully typed results!
+result.results.forEach((item: LodaSearchResult) => {
+  console.log(item.titles[0]?.title);
+});
+```
+
+### Search Jurisprudence
+
+```typescript
+const result = await client.searchJuri('contrat de travail', {
+  pageSize: 10,
+  juridictionJudiciaire: ['Cour de cassation'],
+  formation: ['Chambre sociale'],
+  dateStart: '2024-01-01',
+  dateEnd: '2024-12-31',
+});
+
+// Fully typed results!
+result.results?.forEach((item: JuriSearchResult) => {
+  console.log(item.titles?.[0]?.title);
+  console.log(`Nature: ${item.nature}`);
 });
 ```
 
