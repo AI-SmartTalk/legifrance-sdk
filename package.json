@@ -33,11 +33,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aismarttalk/legifrance-sdk.git"
+    "url": "https://github.com/AI-SmartTalk/legifrance-sdk.git"
   },
-  "homepage": "https://github.com/aismarttalk/legifrance-sdk#readme",
+  "homepage": "https://github.com/AI-SmartTalk/legifrance-sdk#readme",
   "bugs": {
-    "url": "https://github.com/aismarttalk/legifrance-sdk/issues"
+    "url": "https://github.com/AI-SmartTalk/legifrance-sdk/issues"
   },
   "engines": {
     "node": ">=16.0.0"
