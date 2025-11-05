@@ -1,23 +1,49 @@
 {
-  "name": "legifrance-sdk",
+  "name": "@aismarttalk/legifrance-sdk",
   "version": "1.0.0",
-  "description": "SDK TypeScript pour l'API Legifrance",
+  "description": "TypeScript SDK for the Legifrance API - Access French legal texts, jurisprudence, and codes with full type safety",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "legifrance",
     "api",
     "sdk",
-    "typescript"
+    "typescript",
+    "french-law",
+    "legal",
+    "jurisprudence",
+    "loda",
+    "juri",
+    "codes",
+    "france",
+    "legislation",
+    "droit"
   ],
-  "author": "",
+  "author": "AI Smarttalk <contact@aismarttalk.tech> (https://aismarttalk.tech)",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aismarttalk/legifrance-sdk.git"
+  },
+  "homepage": "https://github.com/aismarttalk/legifrance-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/aismarttalk/legifrance-sdk/issues"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "devDependencies": {
     "@types/node": "^20.10.0",
-    "swagger-typescript-api": "^13.2.16",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   },

@@ -1,0 +1,31 @@
+# Development files
+examples/
+node_modules/
+.env
+.env.example
+*.log
+
+# Source files (we include them via "files" in package.json)
+# But exclude these
+legifrance.swagger.json
+tsconfig.json
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Tests
+*.test.ts
+*.spec.ts
+
+# Build artifacts from examples
+examples/**/*.js
+examples/**/*.d.ts
+
