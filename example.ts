@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { LegifranceClient } from './src';
+import { LegifranceClient, Nature, Facette } from './src';
 
 async function main() {
   const client = new LegifranceClient({
@@ -19,14 +19,14 @@ async function main() {
     console.log('Error:', error.message);
   }
 
-  // List LODA texts
+  // List LODA texts (WORKS on sandbox)
   try {
     const result = await client.listLoda({
       pageSize: 5,
       pageNumber: 1,
     });
     
-    console.log('\nLODA texts:');
+    console.log('\nLODA list:');
     console.log('Total:', result.totalResultNumber);
     console.log('Results:', result.results?.length);
     
@@ -37,6 +37,30 @@ async function main() {
     }
   } catch (error: any) {
     console.log('Error:', error.message);
+  }
+
+  // Search in LODA (with proper types!)
+  try {
+    const result = await client.searchLoda('environnement', { 
+      pageSize: 3,
+      natures: [Nature.DECRET, Nature.ARRETE]
+    });
+    
+    console.log('\nLODA search:');
+    console.log('Total:', result.totalResultNumber);
+    console.log('Results:', result.results.length);
+    
+    result.results.forEach((item, i) => {        
+      // All fields are typed!
+      const title = item.titles[0]?.title || item.id;
+      console.log(`${i + 1}. ${title}`);
+      console.log(`   Nature: ${item.nature}`);
+      console.log(`   NOR: ${item.nor}`);
+      console.log(`   Status: ${item.etat}`);
+      console.log(`   Date: ${item.datePublication}`);
+    });
+  } catch (error: any) {
+    console.log('Search error:', error.response?.status, error.response?.data?.message || error.message);
   }
 }
 

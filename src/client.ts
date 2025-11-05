@@ -195,6 +195,136 @@ export class LegifranceClient {
   }
 
   /**
+   * Consult a LODA text by ID
+   */
+  async consultLoda(textId: string, options?: { date?: string; searchedString?: string }): Promise<any> {
+    const request = {
+      textId,
+      date: options?.date || new Date().toISOString().split('T')[0],
+      searchedString: options?.searchedString,
+    };
+    const response = await this.axiosInstance.post('/consult/loda', request);
+    return response.data;
+  }
+
+  /**
+   * Get specific version of LODA text by date
+   */
+  async consultLodaVersion(textId: string, date: string): Promise<any> {
+    const dateObj = new Date(date);
+    const request = {
+      textId,
+      year: dateObj.getFullYear(),
+      month: dateObj.getMonth() + 1,
+      dayOfMonth: dateObj.getDate(),
+    };
+    const response = await this.axiosInstance.post('/consult/loda/version', request);
+    return response.data;
+  }
+
+  /**
+   * List versions of a LODA text
+   */
+  async listLodaVersions(textId: string): Promise<any> {
+    const response = await this.axiosInstance.post('/consult/loda/versions', { textId });
+    return response.data;
+  }
+
+  /**
+   * Search in LODA texts with filters (like Python pylegifrance)
+   */
+  async searchLoda(
+    query: string, 
+    options?: { 
+      pageSize?: number; 
+      pageNumber?: number;
+      natures?: string[];
+    }
+  ): Promise<SearchResponse> {
+    // Build search fields (multiple fields for better results)
+    const champs = [
+      {
+        typeChamp: 'ALL',
+        criteres: [{
+          valeur: query,
+          typeRecherche: 'TOUS_LES_MOTS_DANS_UN_CHAMP',
+          operateur: 'ET' as const,
+        }],
+        operateur: 'ET' as const,
+      },
+      {
+        typeChamp: 'TEXTE',
+        criteres: [{
+          valeur: query,
+          typeRecherche: 'UN_DES_MOTS',
+          operateur: 'ET' as const,
+        }],
+        operateur: 'OU' as const,
+      },
+      {
+        typeChamp: 'TITLE',
+        criteres: [{
+          valeur: query,
+          typeRecherche: 'UN_DES_MOTS',
+          operateur: 'ET' as const,
+        }],
+        operateur: 'OU' as const,
+      },
+    ];
+
+    // Build filters (like Python)
+    const filtres: any[] = [
+      {
+        facette: 'DATE_VERSION',
+        singleDate: Date.now(), // Timestamp, not ISO string
+        dates: null,
+        valeurs: null,
+        multiValeurs: null,
+      },
+      {
+        facette: 'TEXT_LEGAL_STATUS',
+        valeurs: ['VIGUEUR'],
+        dates: null,
+        singleDate: null,
+        multiValeurs: null,
+      },
+      {
+        facette: 'ARTICLE_LEGAL_STATUS',
+        valeurs: ['VIGUEUR'],
+        dates: null,
+        singleDate: null,
+        multiValeurs: null,
+      },
+    ];
+
+    if (options?.natures && options.natures.length > 0) {
+      filtres.push({
+        facette: 'NATURE',
+        valeurs: options.natures,
+        dates: null,
+        singleDate: null,
+        multiValeurs: null,
+      });
+    }
+
+    const searchRequest: SearchRequest = {
+      fond: 'LODA_DATE',
+      recherche: {
+        champs,
+        filtres,
+        operateur: 'ET',
+        pageNumber: options?.pageNumber || 1,
+        pageSize: options?.pageSize || 10,
+        sort: 'PUBLICATION_DATE_DESC',
+        typePagination: 'DEFAUT',
+      }
+    };
+    
+    const response = await this.axiosInstance.post('/search', searchRequest);
+    return response.data;
+  }
+
+  /**
    * Ping pour vérifier la connexion
    */
   async ping(): Promise<string> {

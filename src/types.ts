@@ -75,15 +75,59 @@ export interface SearchResponse {
   pageSize: number;
 }
 
+export interface SearchResultTitle {
+  id: string;
+  cid: string;
+  title: string;
+  legalStatus: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  nature: string | null;
+}
+
+export interface SearchResultSection {
+  id: string | null;
+  title: string | null;
+  dateVersion: string | null;
+  legalStatus: string | null;
+  extracts: any[];
+}
+
 export interface SearchResult {
   id: string;
   cid: string;
+  titles: SearchResultTitle[];
+  text: string | null;
+  type: string;
   nature: string;
-  num: string;
-  title: string;
-  date: number;
+  origin: string;
   etat: string;
+  date: string;
+  sections: SearchResultSection[];
+  num: string | null;
+  jorfText: string | null;
+  numParution: string | null;
+  datePublication: string;
+  dossiersLegislatifs: any[];
+  nor: string;
+  motsCles: string[];
+  appellations: string[];
+  idAttachment: string | null;
+  sizeAttachment: number | null;
+  moreArticle: boolean;
+  additionalResult: Record<string, any>;
+  raisonSociale: string | null;
+  idcc: string | null;
+  descriptionFusionHtml: string | null;
+  dateSignature: string | null;
+  dateDiffusion: string | null;
+  reference: string | null;
+  themes: string[];
+  conforme: boolean;
+  resumePrincipal: any[];
+  autreResume: any[];
   texteHtml?: string;
+  title?: string;
 }
 
 /**
